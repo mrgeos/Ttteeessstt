@@ -1,0 +1,586 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>YOY — Pleasure Lab · концепция</title>
+<meta name="description" content="YOY — Pleasure Lab. Your Pleasure Formula Yogurt. Концепция бренда, 21 слайд.">
+<meta property="og:title" content="YOY — Pleasure Lab">
+<meta property="og:description" content="Your Pleasure Formula Yogurt — концепция бренда">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://mrgeos.github.io/Ttteeessstt/slides/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0d0d0e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="YOY">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+:root {
+  --bg: #0d0d0e;
+  --fg: #f4f4f5;
+  --muted: #9b9ba1;
+  --line: rgba(255,255,255,.14);
+  --glass: rgba(24,24,26,.72);
+  --ph: #1d1d20;
+  --sl: env(safe-area-inset-left, 0px);
+  --sr: env(safe-area-inset-right, 0px);
+  --st: env(safe-area-inset-top, 0px);
+  --sb: env(safe-area-inset-bottom, 0px);
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; height: 100%;
+  background: var(--bg); color: var(--fg);
+  font: 15px/1.35 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+body {
+  display: flex; flex-direction: column;
+  height: 100vh; height: 100dvh;
+  overflow: hidden;
+  user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+}
+button {
+  font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer;
+}
+button:focus-visible, a:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+svg { display: block; }
+
+/* top bar */
+.top {
+  display: flex; align-items: center; gap: 12px;
+  padding: calc(10px + var(--st)) calc(14px + var(--sr)) 10px calc(16px + var(--sl));
+  position: relative; z-index: 3;
+}
+.title { flex: 1; min-width: 0; }
+.title b { display: block; font-weight: 650; font-size: 15px; letter-spacing: .01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.title span { display: block; color: var(--muted); font-size: 12px; }
+.ctrls { display: flex; align-items: center; gap: 4px; }
+.count {
+  font-variant-numeric: tabular-nums; font-size: 14px; font-weight: 600;
+  padding: 0 8px; min-width: 64px; text-align: center; white-space: nowrap;
+}
+.icon {
+  width: 40px; height: 40px; border-radius: 12px;
+  display: grid; place-items: center;
+}
+.icon:hover { background: rgba(255,255,255,.08); }
+.icon:active { background: rgba(255,255,255,.14); }
+.progress { height: 2px; background: var(--line); position: relative; z-index: 3; }
+.progress i { position: absolute; inset: 0 auto 0 0; width: 0; background: var(--fg); transition: width .25s ease; }
+
+/* slides */
+#track {
+  flex: 1; min-height: 0;
+  display: flex;
+  overflow-x: auto; overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  touch-action: pan-x;
+  -webkit-overflow-scrolling: touch;
+}
+#track::-webkit-scrollbar { display: none; }
+body.zoomed #track { overflow-x: hidden; touch-action: none; }
+.slide {
+  flex: 0 0 100%; height: 100%;
+  scroll-snap-align: center; scroll-snap-stop: always;
+  position: relative; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  padding: 12px calc(12px + var(--sr)) 12px calc(12px + var(--sl));
+  container-type: size;
+}
+.slide img {
+  display: block;
+  aspect-ratio: var(--ar);
+  width: min(100cqw, 100cqh * var(--ar));
+  height: auto;
+  background: var(--ph);
+  border-radius: 6px;
+  transform-origin: 0 0;
+  will-change: transform;
+  -webkit-user-drag: none;
+}
+@supports not (width: 1cqw) {
+  .slide img { width: 100%; height: 100%; object-fit: contain; background: none; border-radius: 0; }
+}
+
+/* bottom: hint + thumbnails */
+.bottom { position: relative; z-index: 3; padding: 0 0 calc(10px + var(--sb)); }
+.hint {
+  display: none;
+  margin: 0 16px 10px; color: var(--muted); font-size: 12.5px;
+  align-items: center; justify-content: center; gap: 8px; text-align: center;
+  text-wrap: balance;
+}
+.hint svg { flex: none; }
+@media (pointer: coarse) { .hint { display: flex; } }
+#thumbs {
+  display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none;
+  padding: 4px calc(16px + var(--sr)) 4px calc(16px + var(--sl));
+  scroll-padding: 0 40%;
+}
+#thumbs::-webkit-scrollbar { display: none; }
+#thumbs button {
+  flex: none; height: 58px; aspect-ratio: var(--ar);
+  border-radius: 5px; overflow: hidden; position: relative;
+  outline: 2px solid transparent; outline-offset: 2px;
+  opacity: .55; transition: opacity .2s, outline-color .2s;
+  background: var(--ph);
+}
+#thumbs button.on { opacity: 1; outline-color: var(--fg); }
+#thumbs img, #grid img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* side arrows (mouse) */
+.nav {
+  position: fixed; top: 50%; z-index: 4;
+  width: 48px; height: 48px; margin-top: -24px; border-radius: 50%;
+  background: var(--glass); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--line);
+  display: none; place-items: center;
+  transition: opacity .25s, background .15s;
+}
+.nav:hover { background: rgba(50,50,54,.85); }
+.nav[disabled] { opacity: 0 !important; pointer-events: none; }
+.prev { left: calc(16px + var(--sl)); }
+.next { right: calc(16px + var(--sr)); }
+@media (hover: hover) and (pointer: fine) { .nav { display: grid; } }
+
+/* landscape: slide fills the screen, controls float over it and hide */
+@media (orientation: landscape) {
+  .top {
+    position: fixed; top: 0; left: 0; right: 0;
+    background: linear-gradient(rgba(13,13,14,.82), rgba(13,13,14,0));
+    padding-bottom: 22px;
+    transition: opacity .3s, transform .3s;
+  }
+  .progress { position: fixed; top: 0; left: 0; right: 0; z-index: 4; background: transparent; }
+  .bottom { display: none; }
+  .slide { padding: max(6px, var(--st)) max(6px, var(--sr)) max(6px, var(--sb)) max(6px, var(--sl)); }
+  .slide img { border-radius: 3px; }
+  body.calm .top { opacity: 0; transform: translateY(-8px); pointer-events: none; }
+  body.calm .nav { opacity: 0; pointer-events: none; }
+}
+
+/* overview grid */
+#grid {
+  position: fixed; inset: 0; z-index: 10;
+  background: var(--bg);
+  display: flex; flex-direction: column;
+  opacity: 0; visibility: hidden; transition: opacity .2s, visibility 0s .2s;
+}
+#grid.open { opacity: 1; visibility: visible; transition: opacity .2s; }
+#grid header {
+  display: flex; align-items: center; gap: 12px;
+  padding: calc(10px + var(--st)) calc(14px + var(--sr)) 10px calc(16px + var(--sl));
+  border-bottom: 1px solid var(--line);
+}
+#grid header b { flex: 1; font-weight: 650; }
+#grid .list {
+  flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
+  display: grid; gap: 18px 12px; align-content: start;
+  grid-template-columns: repeat(auto-fill, minmax(156px, 1fr));
+  padding: 16px calc(16px + var(--sr)) calc(24px + var(--sb)) calc(16px + var(--sl));
+}
+#grid .list button { display: flex; flex-direction: column; gap: 6px; text-align: left; }
+#grid .pic {
+  width: 100%; aspect-ratio: 5 / 3; border-radius: 6px; overflow: hidden; background: var(--ph);
+  outline: 2px solid transparent; outline-offset: 2px;
+}
+#grid .pic img { object-fit: contain; background: #fff; }
+#grid .list button.on .pic { outline-color: var(--fg); }
+#grid .list small { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+#grid .list button.on small { color: var(--fg); }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="title"><b>YOY — Pleasure Lab</b><span>Концепция бренда</span></div>
+  <div class="ctrls">
+    <span class="count" id="count" aria-live="polite">1 / 21</span>
+    <button class="icon" id="gridBtn" aria-label="Все слайды" title="Все слайды (G)">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2.5" y="2.5" width="6" height="6" rx="1.5"/><rect x="11.5" y="2.5" width="6" height="6" rx="1.5"/><rect x="2.5" y="11.5" width="6" height="6" rx="1.5"/><rect x="11.5" y="11.5" width="6" height="6" rx="1.5"/></svg>
+    </button>
+    <button class="icon" id="fsBtn" aria-label="Во весь экран" title="Во весь экран (F)" hidden>
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 7.5V3h4.5M12.5 3H17v4.5M17 12.5V17h-4.5M7.5 17H3v-4.5"/></svg>
+    </button>
+  </div>
+</header>
+<div class="progress"><i id="bar"></i></div>
+
+<main id="track" aria-roledescription="карусель" aria-label="Слайды"></main>
+
+<footer class="bottom">
+  <p class="hint">
+    <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="8" height="13" rx="1.6"/><path d="M3 12.5a7.5 7.5 0 0 0 9.5 5.2M12.5 17.7l-1.6-1.9M12.5 17.7l-2.3.6"/></svg>
+    Поверните телефон — слайд во весь экран. Двойное касание — увеличить.
+  </p>
+  <nav id="thumbs" aria-label="Миниатюры"></nav>
+</footer>
+
+<button class="nav prev" id="prev" aria-label="Предыдущий слайд">
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12.5 4 6.5 10l6 6"/></svg>
+</button>
+<button class="nav next" id="next" aria-label="Следующий слайд">
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 4l6 6-6 6"/></svg>
+</button>
+
+<div id="grid" role="dialog" aria-modal="true" aria-label="Все слайды">
+  <header>
+    <b>Все слайды</b>
+    <button class="icon" id="gridClose" aria-label="Закрыть">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 5l10 10M15 5 5 15"/></svg>
+    </button>
+  </header>
+  <div class="list" id="gridList"></div>
+</div>
+
+<script>
+(() => {
+  // Width / height of each slide (pages 7, 10 and 19 are taller than the rest).
+  const AR = [1.6672,1.6672,1.6672,1.6672,1.6672,1.6672,1.5432,1.6672,1.6672,1.6141,1.6672,1.6672,1.6672,1.6672,1.6672,1.6672,1.6672,1.6672,1.3926,1.6672,1.6672];
+  const N = AR.length;
+  const id = i => String(i + 1).padStart(2, '0');
+  const src = (i, size) => `slides/${id(i)}-${size}.webp`;
+
+  const $ = s => document.getElementById(s);
+  const track = $('track'), thumbs = $('thumbs'), grid = $('grid'), gridList = $('gridList');
+  const count = $('count'), bar = $('bar'), prevBtn = $('prev'), nextBtn = $('next');
+  const body = document.body;
+
+  const slides = [], imgs = [], thumbBtns = [], gridBtns = [];
+  for (let i = 0; i < N; i++) {
+    const s = document.createElement('section');
+    s.className = 'slide';
+    s.setAttribute('aria-roledescription', 'слайд');
+    s.setAttribute('aria-label', `${i + 1} из ${N}`);
+    const img = document.createElement('img');
+    img.style.setProperty('--ar', AR[i]);
+    img.alt = `Слайд ${i + 1}`;
+    img.decoding = 'async';
+    img.loading = i < 2 ? 'eager' : 'lazy';
+    img.sizes = '100vw';
+    img.srcset = `${src(i, 1280)} 1280w, ${src(i, 2048)} 2048w, ${src(i, 3200)} 3196w`;
+    img.src = src(i, 2048);
+    img.draggable = false;
+    s.appendChild(img);
+    track.appendChild(s);
+    slides.push(s); imgs.push(img);
+
+    const t = document.createElement('button');
+    t.style.setProperty('--ar', AR[i]);
+    t.setAttribute('aria-label', `Слайд ${i + 1}`);
+    t.innerHTML = `<img src="${src(i, 'thumb')}" alt="" loading="lazy" decoding="async">`;
+    t.onclick = () => go(i);
+    thumbs.appendChild(t); thumbBtns.push(t);
+
+    const g = document.createElement('button');
+    g.innerHTML = `<span class="pic"><img src="${src(i, 'thumb')}" alt="" loading="lazy" decoding="async"></span><small>${i + 1}</small>`;
+    g.setAttribute('aria-label', `Слайд ${i + 1}`);
+    g.onclick = () => { closeGrid(); go(i, false); };
+    gridList.appendChild(g); gridBtns.push(g);
+  }
+
+  // ---------- navigation ----------
+  let cur = -1;
+  const W = () => track.clientWidth;
+
+  function go(i, smooth = true) {
+    i = Math.max(0, Math.min(N - 1, i));
+    resetZoom(false);
+    if (smooth && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      track.scrollTo({ left: i * W(), behavior: 'smooth' });
+    } else {
+      track.scrollLeft = i * W();
+      setCur(i);
+    }
+  }
+
+  function setCur(i) {
+    if (i === cur) return;
+    if (cur >= 0) { resetZoom(false); thumbBtns[cur].classList.remove('on'); gridBtns[cur].classList.remove('on'); }
+    cur = i;
+    count.textContent = `${i + 1} / ${N}`;
+    bar.style.width = `${((i + 1) / N) * 100}%`;
+    prevBtn.disabled = i === 0;
+    nextBtn.disabled = i === N - 1;
+    thumbBtns[i].classList.add('on'); gridBtns[i].classList.add('on');
+    centerThumb(thumbBtns[i]);
+    for (let j = i - 1; j <= i + 2; j++) if (imgs[j]) imgs[j].loading = 'eager';
+    try { history.replaceState(null, '', `#${i + 1}`); } catch (e) {}
+  }
+
+  function centerThumb(t) {
+    const left = t.offsetLeft - (thumbs.clientWidth - t.offsetWidth) / 2;
+    thumbs.scrollTo({ left, behavior: cur < 0 ? 'auto' : 'smooth' });
+  }
+
+  // Ignore scroll events while the layout settles after a resize / rotation.
+  let settleUntil = 0, scrollRaf = 0;
+  track.addEventListener('scroll', () => {
+    if (performance.now() < settleUntil) return;
+    cancelAnimationFrame(scrollRaf);
+    scrollRaf = requestAnimationFrame(() => setCur(Math.round(track.scrollLeft / W())));
+  }, { passive: true });
+
+  let lastW = 0;
+  new ResizeObserver(() => {
+    const w = W();
+    if (!w || w === lastW) return;
+    lastW = w;
+    settleUntil = performance.now() + 250;
+    resetZoom(false);
+    const i = Math.max(cur, 0);
+    track.scrollLeft = i * w;
+    requestAnimationFrame(() => { track.scrollLeft = i * W(); });
+    setTimeout(() => { track.scrollLeft = i * W(); }, 260);
+  }).observe(track);
+
+  prevBtn.onclick = () => go(cur - 1);
+  nextBtn.onclick = () => go(cur + 1);
+
+  // ---------- overview grid ----------
+  const gridBtn = $('gridBtn');
+  function openGrid() {
+    grid.classList.add('open');
+    const b = gridBtns[cur];
+    b.scrollIntoView({ block: 'center' });
+    b.focus({ preventScroll: true });
+  }
+  function closeGrid() { grid.classList.remove('open'); gridBtn.focus({ preventScroll: true }); }
+  gridBtn.onclick = openGrid;
+  $('gridClose').onclick = closeGrid;
+
+  // ---------- fullscreen (Android / desktop; iPhone has no Fullscreen API for pages) ----------
+  const fsBtn = $('fsBtn');
+  const root = document.documentElement;
+  const canFs = document.fullscreenEnabled || document.webkitFullscreenEnabled;
+  if (canFs) fsBtn.hidden = false;
+  function toggleFs() {
+    if (document.fullscreenElement || document.webkitFullscreenElement) {
+      (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+    } else {
+      const p = (root.requestFullscreen || root.webkitRequestFullscreen).call(root);
+      if (p && p.catch) p.catch(() => {});
+    }
+  }
+  fsBtn.onclick = toggleFs;
+
+  // ---------- controls fade in landscape ----------
+  let calmTimer = 0;
+  const landscape = matchMedia('(orientation: landscape)');
+  function wake(ms = 2600) {
+    body.classList.remove('calm');
+    clearTimeout(calmTimer);
+    calmTimer = setTimeout(() => { if (!grid.classList.contains('open')) body.classList.add('calm'); }, ms);
+  }
+  function toggleCalm() {
+    if (body.classList.contains('calm')) wake(3500);
+    else { clearTimeout(calmTimer); body.classList.add('calm'); }
+  }
+  document.addEventListener('mousemove', e => { if (e.movementX || e.movementY) wake(); });
+  landscape.addEventListener && landscape.addEventListener('change', () => wake(3000));
+
+  // ---------- zoom ----------
+  const MAX = 5;
+  let z = { s: 1, tx: 0, ty: 0 };
+  let hiRes = new Set();
+
+  function geom() {
+    const img = imgs[cur], sl = slides[cur];
+    return { img, sl, W: sl.clientWidth, H: sl.clientHeight, ox: img.offsetLeft, oy: img.offsetTop, w: img.offsetWidth, h: img.offsetHeight, r: sl.getBoundingClientRect() };
+  }
+  function clampZ(g, t) {
+    const sw = t.s * g.w, sh = t.s * g.h;
+    t.tx = sw <= g.W ? (g.W - sw) / 2 - g.ox : Math.min(-g.ox, Math.max(g.W - sw - g.ox, t.tx));
+    t.ty = sh <= g.H ? (g.H - sh) / 2 - g.oy : Math.min(-g.oy, Math.max(g.H - sh - g.oy, t.ty));
+    return t;
+  }
+  function apply(anim) {
+    const img = imgs[cur];
+    img.style.transition = anim ? 'transform .28s cubic-bezier(.2,.7,.2,1)' : 'none';
+    img.style.transform = z.s === 1 && !z.tx && !z.ty ? '' : `translate(${z.tx}px, ${z.ty}px) scale(${z.s})`;
+    const zoomed = z.s > 1.001;
+    body.classList.toggle('zoomed', zoomed);
+    if (zoomed) loadHiRes(cur);
+  }
+  function loadHiRes(i) {
+    if (hiRes.has(i)) return;
+    hiRes.add(i);
+    const pre = new Image();
+    pre.onload = () => { imgs[i].srcset = `${src(i, 3200)} 3196w`; };
+    pre.src = src(i, 3200);
+  }
+  function resetZoom(anim = true) {
+    if (cur < 0) return;
+    if (z.s === 1 && !z.tx && !z.ty) return;
+    z = { s: 1, tx: 0, ty: 0 };
+    apply(anim);
+  }
+  // Zoom to scale s keeping the client point (cx, cy) fixed.
+  function zoomAt(s, cx, cy, anim, base = z) {
+    const g = geom();
+    const px = cx - g.r.left, py = cy - g.r.top;
+    const u = (px - g.ox - base.tx) / base.s, v = (py - g.oy - base.ty) / base.s;
+    z = { s, tx: px - g.ox - s * u, ty: py - g.oy - s * v };
+    if (anim) clampZ(g, z);
+    apply(anim);
+  }
+  function toggleZoomAt(cx, cy) {
+    if (z.s > 1.001) resetZoom(true);
+    else zoomAt(2.5, cx, cy, true);
+  }
+
+  // Touch: native horizontal swipe between slides; pinch, pan-when-zoomed and taps are ours.
+  let pinch = null, pan = null, tap = null, lastTap = null, tapTimer = 0;
+  const dist = (a, b) => Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+  const mid = (a, b) => ({ x: (a.clientX + b.clientX) / 2, y: (a.clientY + b.clientY) / 2 });
+
+  track.addEventListener('touchstart', e => {
+    const t = e.touches;
+    if (t.length === 2) {
+      e.preventDefault();
+      tap = null; pan = null;
+      track.scrollLeft = cur * W();
+      const m = mid(t[0], t[1]);
+      pinch = { d: dist(t[0], t[1]), x: m.x, y: m.y, base: { ...z } };
+    } else if (t.length === 1) {
+      tap = { x: t[0].clientX, y: t[0].clientY, time: Date.now() };
+      if (z.s > 1.001) pan = { x: t[0].clientX, y: t[0].clientY, tx: z.tx, ty: z.ty };
+    } else { tap = null; }
+  }, { passive: false });
+
+  track.addEventListener('touchmove', e => {
+    const t = e.touches;
+    if (pinch && t.length === 2) {
+      e.preventDefault();
+      const m = mid(t[0], t[1]);
+      const s = Math.max(.85, Math.min(MAX * 1.15, pinch.base.s * dist(t[0], t[1]) / pinch.d));
+      // keep the content point under the initial centre under the moving centre
+      const g = geom();
+      const u = (pinch.x - g.r.left - g.ox - pinch.base.tx) / pinch.base.s;
+      const v = (pinch.y - g.r.top - g.oy - pinch.base.ty) / pinch.base.s;
+      z = { s, tx: m.x - g.r.left - g.ox - s * u, ty: m.y - g.r.top - g.oy - s * v };
+      apply(false);
+      return;
+    }
+    if (tap && t.length === 1 && Math.hypot(t[0].clientX - tap.x, t[0].clientY - tap.y) > 10) tap = null;
+    if (pan && t.length === 1) {
+      e.preventDefault();
+      z.tx = pan.tx + t[0].clientX - pan.x;
+      z.ty = pan.ty + t[0].clientY - pan.y;
+      clampZ(geom(), z);
+      apply(false);
+    } else if (z.s > 1.001) {
+      e.preventDefault();
+    }
+  }, { passive: false });
+
+  function endTouch(e) {
+    if (pinch && e.touches.length < 2) {
+      pinch = null;
+      const g = geom();
+      if (z.s < 1.05) z = { s: 1, tx: 0, ty: 0 };
+      else if (z.s > MAX) {
+        const cx = g.r.left + g.W / 2, cy = g.r.top + g.H / 2;
+        const u = (cx - g.r.left - g.ox - z.tx) / z.s, v = (cy - g.r.top - g.oy - z.ty) / z.s;
+        z = { s: MAX, tx: g.W / 2 - g.ox - MAX * u, ty: g.H / 2 - g.oy - MAX * v };
+      }
+      clampZ(g, z);
+      apply(true);
+      if (e.touches.length === 1 && z.s > 1.001) {
+        const t = e.touches[0];
+        pan = { x: t.clientX, y: t.clientY, tx: z.tx, ty: z.ty };
+      }
+      tap = null;
+      return;
+    }
+    if (e.touches.length) return;
+    pan = null;
+    if (!tap || e.type === 'touchcancel' || Date.now() - tap.time > 350) { tap = null; return; }
+    const p = tap; tap = null;
+    if (lastTap && p.time - lastTap.time < 320 && Math.hypot(p.x - lastTap.x, p.y - lastTap.y) < 40) {
+      clearTimeout(tapTimer);
+      lastTap = null;
+      e.preventDefault();
+      toggleZoomAt(p.x, p.y);
+    } else {
+      lastTap = p;
+      clearTimeout(tapTimer);
+      tapTimer = setTimeout(() => { lastTap = null; if (landscape.matches) toggleCalm(); }, 320);
+    }
+  }
+  track.addEventListener('touchend', endTouch, { passive: false });
+  track.addEventListener('touchcancel', endTouch);
+  // Stop iOS Safari page zoom.
+  document.addEventListener('gesturestart', e => e.preventDefault());
+  document.addEventListener('gesturechange', e => e.preventDefault());
+
+  // Mouse: double-click zoom, drag to pan, ctrl+wheel / trackpad pinch.
+  let lastTouch = 0;
+  track.addEventListener('touchstart', () => { lastTouch = Date.now(); }, { passive: true, capture: true });
+  track.addEventListener('dblclick', e => { if (Date.now() - lastTouch < 1000) return; toggleZoomAt(e.clientX, e.clientY); });
+  let drag = null;
+  track.addEventListener('mousedown', e => {
+    if (z.s <= 1.001 || e.button) return;
+    e.preventDefault();
+    drag = { x: e.clientX, y: e.clientY, tx: z.tx, ty: z.ty };
+    track.style.cursor = 'grabbing';
+  });
+  addEventListener('mousemove', e => {
+    if (!drag) return;
+    z.tx = drag.tx + e.clientX - drag.x; z.ty = drag.ty + e.clientY - drag.y;
+    clampZ(geom(), z); apply(false);
+  });
+  addEventListener('mouseup', () => { drag = null; track.style.cursor = ''; });
+  track.addEventListener('wheel', e => {
+    if (e.ctrlKey) {
+      e.preventDefault();
+      const s = Math.max(1, Math.min(MAX, z.s * Math.exp(-e.deltaY / 100)));
+      zoomAt(s, e.clientX, e.clientY, false);
+      clampZ(geom(), z); apply(false);
+      if (s === 1) resetZoom(false);
+    } else if (z.s > 1.001) {
+      e.preventDefault();
+      z.tx -= e.deltaX; z.ty -= e.deltaY;
+      clampZ(geom(), z); apply(false);
+    }
+  }, { passive: false });
+
+  // ---------- keyboard ----------
+  addEventListener('keydown', e => {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (grid.classList.contains('open')) { if (e.key === 'Escape' || e.key === 'g' || e.key === 'п') closeGrid(); return; }
+    switch (e.key) {
+      case 'ArrowRight': case 'PageDown': case ' ': e.preventDefault(); go(cur + 1); break;
+      case 'ArrowLeft': case 'PageUp': e.preventDefault(); go(cur - 1); break;
+      case 'Home': go(0); break;
+      case 'End': go(N - 1); break;
+      case 'Escape': resetZoom(true); break;
+      case 'g': case 'п': openGrid(); break;
+      case 'f': case 'а': if (canFs) toggleFs(); break;
+      default: return;
+    }
+    wake();
+  });
+
+  // ---------- start ----------
+  const start = Math.max(0, Math.min(N - 1, (parseInt(location.hash.slice(1), 10) || 1) - 1));
+  lastW = W();
+  track.scrollLeft = start * W();
+  setCur(start);
+  requestAnimationFrame(() => { track.scrollLeft = start * W(); });
+  wake(3000);
+})();
+</script>
+</body>
+</html>
