@@ -95,19 +95,40 @@ body.zoomed #track { overflow-x: hidden; touch-action: none; }
   padding: 12px calc(12px + var(--sr)) 12px calc(12px + var(--sl));
   container-type: size;
 }
-.slide img {
-  display: block;
+.frame {
+  position: relative; flex: none;
   aspect-ratio: var(--ar);
   width: min(100cqw, 100cqh * var(--ar));
-  height: auto;
   background: var(--ph);
-  border-radius: 6px;
+  border-radius: 6px; overflow: hidden;
   transform-origin: 0 0;
-  will-change: transform;
-  -webkit-user-drag: none;
 }
-@supports not (width: 1cqw) {
-  .slide img { width: 100%; height: 100%; object-fit: contain; background: none; border-radius: 0; }
+@supports not (width: 1cqw) { .frame { width: 100%; } }
+/* only while a finger moves: at rest the browser repaints sharply at the final scale */
+.frame.moving { will-change: transform; }
+.frame > img { display: block; width: 100%; height: 100%; -webkit-user-drag: none; }
+.tiles { position: absolute; inset: 0; pointer-events: none; }
+.tiles img { position: absolute; display: block; opacity: 0; transition: opacity .3s ease; }
+.tiles img.on { opacity: 1; }
+
+/* loading ring while sharper zoom tiles arrive */
+.load {
+  position: fixed; z-index: 5; right: calc(14px + var(--sr)); top: 0;
+  width: 30px; height: 30px; border-radius: 50%;
+  background: rgba(20,20,22,.55);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  display: grid; place-items: center;
+  opacity: 0; transform: scale(.7); pointer-events: none;
+  transition: opacity .2s ease, transform .2s ease;
+}
+.load.on { opacity: 1; transform: none; }
+.load circle { fill: none; stroke-width: 2.4; }
+.load .bg { stroke: rgba(255,255,255,.25); }
+.load .fg {
+  stroke: #fff; stroke-linecap: round;
+  stroke-dasharray: 50.27; stroke-dashoffset: 50.27;
+  transform: rotate(-90deg); transform-origin: 50% 50%;
+  transition: stroke-dashoffset .25s ease;
 }
 
 /* bottom: hint + thumbnails */
@@ -162,7 +183,7 @@ body.zoomed #track { overflow-x: hidden; touch-action: none; }
   .progress { position: fixed; top: 0; left: 0; right: 0; z-index: 4; background: transparent; }
   .bottom { display: none; }
   .slide { padding: max(6px, var(--st)) max(6px, var(--sr)) max(6px, var(--sb)) max(6px, var(--sl)); }
-  .slide img { border-radius: 3px; }
+  .frame { border-radius: 3px; }
   body.calm .top { opacity: 0; transform: translateY(-8px); pointer-events: none; }
   body.calm .nav { opacity: 0; pointer-events: none; }
 }
@@ -234,6 +255,10 @@ body.zoomed #track { overflow-x: hidden; touch-action: none; }
   <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 4l6 6-6 6"/></svg>
 </button>
 
+<div class="load" id="load" aria-hidden="true">
+  <svg width="20" height="20" viewBox="0 0 20 20"><circle class="bg" cx="10" cy="10" r="8"/><circle class="fg" id="loadRing" cx="10" cy="10" r="8"/></svg>
+</div>
+
 <div id="grid" role="dialog" aria-modal="true" aria-label="Все слайды">
   <header>
     <b>Все слайды</b>
@@ -246,40 +271,71 @@ body.zoomed #track { overflow-x: hidden; touch-action: none; }
 
 <script>
 (() => {
-  // Width / height of each slide (slides 8 and 12 are taller than the rest).
-  const AR = [1.6672,1.6672,1.6672,1.6672,1.6672,1.6672,1.6672,1.5432,1.6672,1.6672,1.6672,1.6141,1.6672,1.6672,1.6672,1.6672,1.6672,1.6672,1.6672,1.6672,1.6672,1.6672,1.6672,1.6672];
-  const N = AR.length;
+  // Slide sizes, cache versions and zoom tile levels [width, height]; written by tools/build_slides.py.
+  const SLIDES = /*SLIDES*/[
+    {"w":3195,"h":1917,"levels":[[6390,3834],[9585,5751]],"v":"7432bed1"},
+    {"w":3195,"h":1917,"levels":[[6390,3834],[9585,5751]],"v":"ef83cc35"},
+    {"w":3195,"h":1917,"levels":[[6390,3834],[9585,5751]],"v":"e127fe93"},
+    {"w":3195,"h":1917,"levels":[[6390,3834],[9585,5751]],"v":"24a46594"},
+    {"w":3195,"h":1917,"levels":[[6390,3834],[9585,5751]],"v":"96f3d172"},
+    {"w":3195,"h":1917,"levels":[[6390,3834],[9585,5751]],"v":"59821eec"},
+    {"w":3195,"h":1917,"levels":[[6390,3834],[9585,5751]],"v":"42b61e83"},
+    {"w":3195,"h":2070,"levels":[[6390,4140],[9585,6210]],"v":"47264750"},
+    {"w":3195,"h":1917,"levels":[[6390,3834],[9585,5751]],"v":"49314124"},
+    {"w":3195,"h":1917,"levels":[[6390,3834],[9585,5751]],"v":"e572cc18"},
+    {"w":3195,"h":1917,"levels":[[6390,3834],[9585,5751]],"v":"91615651"},
+    {"w":3195,"h":1980,"levels":[[6390,3960],[9585,5940]],"v":"b9afcd17"},
+    {"w":3195,"h":1917,"levels":[[6390,3834],[9585,5751]],"v":"a2807dcc"},
+    {"w":3195,"h":1917,"levels":[[6390,3834],[9585,5751]],"v":"d8c73330"},
+    {"w":3195,"h":1917,"levels":[[6390,3834],[9585,5751]],"v":"03b8965d"},
+    {"w":3195,"h":1917,"levels":[[6390,3834],[9585,5751]],"v":"ba11548b"},
+    {"w":3195,"h":1917,"levels":[[6390,3834],[9585,5751]],"v":"0c5cd4af"},
+    {"w":3195,"h":1917,"levels":[[6390,3834],[9585,5751]],"v":"82790011"},
+    {"w":3195,"h":1917,"levels":[[6390,3834],[9585,5751]],"v":"e28dbc20"},
+    {"w":3195,"h":1917,"levels":[[6390,3834],[9585,5751]],"v":"f5fac38a"},
+    {"w":3195,"h":1917,"levels":[[6390,3834],[9585,5751]],"v":"8829f822"},
+    {"w":3195,"h":1917,"levels":[[6390,3834],[9585,5751]],"v":"86937114"},
+    {"w":3195,"h":1917,"levels":[[6390,3834],[9585,5751]],"v":"a8b79bf8"},
+    {"w":3195,"h":1917,"levels":[[6390,3834],[9585,5751]],"v":"de8feb4d"}
+  ]/*/SLIDES*/;
+  const TILE = 512;
+  const N = SLIDES.length;
   const id = i => String(i + 1).padStart(2, '0');
-  // Bump V when slide images change so cached copies are not reused.
-  const V = 7;
-  const src = (i, size) => `slides/${id(i)}-${size}.webp?v=${V}`;
+  const ar = i => SLIDES[i].w / SLIDES[i].h;
+  const src = (i, size) => `slides/${id(i)}-${size}.webp?v=${SLIDES[i].v}`;
+  const tileSrc = (i, l, c, r) => `slides/${id(i)}/${l}/${c}_${r}.webp?v=${SLIDES[i].v}`;
 
   const $ = s => document.getElementById(s);
   const track = $('track'), thumbs = $('thumbs'), grid = $('grid'), gridList = $('gridList');
   const count = $('count'), bar = $('bar'), prevBtn = $('prev'), nextBtn = $('next');
   const body = document.body;
 
-  const slides = [], imgs = [], thumbBtns = [], gridBtns = [];
+  const slides = [], frames = [], imgs = [], layers = [], thumbBtns = [], gridBtns = [];
   for (let i = 0; i < N; i++) {
     const s = document.createElement('section');
     s.className = 'slide';
     s.setAttribute('aria-roledescription', 'слайд');
     s.setAttribute('aria-label', `${i + 1} из ${N}`);
+    const fr = document.createElement('div');
+    fr.className = 'frame';
+    fr.style.setProperty('--ar', ar(i));
     const img = document.createElement('img');
-    img.style.setProperty('--ar', AR[i]);
     img.alt = `Слайд ${i + 1}`;
     img.decoding = 'async';
     img.loading = i < 2 ? 'eager' : 'lazy';
     img.sizes = '100vw';
-    img.srcset = `${src(i, 1280)} 1280w, ${src(i, 2048)} 2048w, ${src(i, 3200)} 3196w`;
+    img.srcset = `${src(i, 1280)} 1280w, ${src(i, 2048)} 2048w, ${src(i, 3200)} ${SLIDES[i].w}w`;
     img.src = src(i, 2048);
     img.draggable = false;
-    s.appendChild(img);
+    const layer = document.createElement('div');
+    layer.className = 'tiles';
+    fr.append(img, layer);
+    s.appendChild(fr);
     track.appendChild(s);
-    slides.push(s); imgs.push(img);
+    slides.push(s); frames.push(fr); imgs.push(img); layers.push(layer);
 
     const t = document.createElement('button');
-    t.style.setProperty('--ar', AR[i]);
+    t.style.setProperty('--ar', ar(i));
     t.setAttribute('aria-label', `Слайд ${i + 1}`);
     t.innerHTML = `<img src="${src(i, 'thumb')}" alt="" loading="lazy" decoding="async">`;
     t.onclick = () => go(i);
@@ -310,7 +366,9 @@ body.zoomed #track { overflow-x: hidden; touch-action: none; }
   function setCur(i) {
     if (i === cur) return;
     if (cur >= 0) { resetZoom(false); thumbBtns[cur].classList.remove('on'); gridBtns[cur].classList.remove('on'); }
+    clearTiles();
     cur = i;
+    warmUp(i);
     count.textContent = `${i + 1} / ${N}`;
     bar.style.width = `${((i + 1) / N) * 100}%`;
     prevBtn.disabled = i === 0;
@@ -336,6 +394,7 @@ body.zoomed #track { overflow-x: hidden; touch-action: none; }
 
   let lastW = 0;
   new ResizeObserver(() => {
+    placeLoader();
     const w = W();
     if (!w || w === lastW) return;
     lastW = w;
@@ -395,11 +454,10 @@ body.zoomed #track { overflow-x: hidden; touch-action: none; }
   // ---------- zoom ----------
   const MAX = 5;
   let z = { s: 1, tx: 0, ty: 0 };
-  let hiRes = new Set();
 
   function geom() {
-    const img = imgs[cur], sl = slides[cur];
-    return { img, sl, W: sl.clientWidth, H: sl.clientHeight, ox: img.offsetLeft, oy: img.offsetTop, w: img.offsetWidth, h: img.offsetHeight, r: sl.getBoundingClientRect() };
+    const fr = frames[cur], sl = slides[cur];
+    return { W: sl.clientWidth, H: sl.clientHeight, ox: fr.offsetLeft, oy: fr.offsetTop, w: fr.offsetWidth, h: fr.offsetHeight, r: sl.getBoundingClientRect() };
   }
   function clampZ(g, t) {
     const sw = t.s * g.w, sh = t.s * g.h;
@@ -408,19 +466,148 @@ body.zoomed #track { overflow-x: hidden; touch-action: none; }
     return t;
   }
   function apply(anim) {
-    const img = imgs[cur];
-    img.style.transition = anim ? 'transform .28s cubic-bezier(.2,.7,.2,1)' : 'none';
-    img.style.transform = z.s === 1 && !z.tx && !z.ty ? '' : `translate(${z.tx}px, ${z.ty}px) scale(${z.s})`;
+    const fr = frames[cur];
+    fr.style.transition = anim ? 'transform .28s cubic-bezier(.2,.7,.2,1)' : 'none';
+    fr.style.transform = z.s === 1 && !z.tx && !z.ty ? '' : `translate(${z.tx}px, ${z.ty}px) scale(${z.s})`;
     const zoomed = z.s > 1.001;
     body.classList.toggle('zoomed', zoomed);
-    if (zoomed) loadHiRes(cur);
+    if (zoomed) loadBase(cur);
+    scheduleTiles();
   }
-  function loadHiRes(i) {
-    if (hiRes.has(i)) return;
-    hiRes.add(i);
+  const moving = on => { if (cur >= 0) frames[cur].classList.toggle('moving', on); };
+
+  // ---------- sharp zoom: base image, tiles, loading ring ----------
+  // Level 0 is the plain image (3200 px); levels 1 and 2 are 2x and 3x, cut into tiles.
+  // Only tiles in view are loaded; the blurry level shows underneath until they fade in.
+  const baseDone = [];
+  function loadBase(i, then) {
+    if (baseDone[i]) { if (then) then(); return; }
+    if (baseDone[i] === false) return;
+    baseDone[i] = false;
     const pre = new Image();
-    pre.onload = () => { imgs[i].srcset = `${src(i, 3200)} 3196w`; };
+    pre.onload = () => {
+      imgs[i].srcset = `${src(i, 3200)} ${SLIDES[i].w}w`;
+      baseDone[i] = true;
+      progress();
+      if (then) then();
+    };
+    pre.onerror = () => { baseDone[i] = undefined; };
     pre.src = src(i, 3200);
+  }
+
+  // While a slide stays on screen, fetch its 3200 px image and then its level-1 tiles in the
+  // background (into the browser cache), so zooming in is sharp right away.
+  let warmTimer = 0, warmQueue = [], warmBusy = 0;
+  function warmUp(i) {
+    clearTimeout(warmTimer);
+    warmQueue = [];
+    warmTimer = setTimeout(() => loadBase(i, () => {
+      if (cur !== i) return;
+      const [lw, lh] = SLIDES[i].levels[0];
+      for (let r = 0; r < Math.ceil(lh / TILE); r++)
+        for (let c = 0; c < Math.ceil(lw / TILE); c++) warmQueue.push(tileSrc(i, 1, c, r));
+      pump();
+    }), 500);
+  }
+  function pump() {
+    while (warmBusy < 3 && warmQueue.length) {
+      const im = new Image();
+      im.fetchPriority = 'low';
+      warmBusy++;
+      im.onload = im.onerror = () => { warmBusy--; pump(); };
+      im.src = warmQueue.shift();
+    }
+  }
+
+  const tiles = new Map();   // "level/col/row" -> <img>, current slide only
+  let tilesOf = -1, want = [], tileRaf = 0, dropTimer = 0;
+  function clearTiles() {
+    if (tilesOf >= 0) layers[tilesOf].textContent = '';
+    tiles.clear(); want = []; tilesOf = -1;
+    clearTimeout(dropTimer);
+    progress();
+  }
+  function scheduleTiles() {
+    if (!tileRaf) tileRaf = requestAnimationFrame(() => { tileRaf = 0; updateTiles(); });
+  }
+  function updateTiles() {
+    if (cur < 0) return;
+    if (tilesOf !== cur) { clearTiles(); tilesOf = cur; }
+    const S = SLIDES[cur], g = geom();
+    const need = g.w * z.s * (devicePixelRatio || 1);
+    const widths = [S.w, ...S.levels.map(l => l[0])];
+    let level = 0;
+    while (level < widths.length - 1 && need > widths[level] * 1.15) level++;
+    clearTimeout(dropTimer);
+    if (!level) {
+      want = [];
+      // back at full view: free the tiles once the zoom-out animation is over
+      if (tiles.size) dropTimer = setTimeout(() => { if (cur === tilesOf) { layers[cur].textContent = ''; tiles.clear(); } }, 400);
+      progress();
+      return;
+    }
+    const [lw, lh] = S.levels[level - 1];
+    const kx = lw / (g.w * z.s), ky = lh / (g.h * z.s);
+    const cols = Math.ceil(lw / TILE), rows = Math.ceil(lh / TILE);
+    const span = (a, b, n) => [Math.max(0, Math.floor(a / TILE)), Math.min(n - 1, Math.floor(b / TILE))];
+    const [c0, c1] = span((-g.ox - z.tx) * kx, (g.W - g.ox - z.tx) * kx, cols);
+    const [r0, r1] = span((-g.oy - z.ty) * ky, (g.H - g.oy - z.ty) * ky, rows);
+    const cc = (c0 + c1) / 2, rc = (r0 + r1) / 2;
+    const list = [];
+    for (let r = Math.max(0, r0 - 1); r <= Math.min(rows - 1, r1 + 1); r++)
+      for (let c = Math.max(0, c0 - 1); c <= Math.min(cols - 1, c1 + 1); c++)
+        list.push({ c, r, inView: c >= c0 && c <= c1 && r >= r0 && r <= r1, d: Math.hypot(c - cc, r - rc) });
+    list.sort((a, b) => (b.inView - a.inView) || (a.d - b.d));   // visible first, from the centre out
+    want = [];
+    const keep = new Set();
+    for (const t of list) {
+      const key = `${level}/${t.c}/${t.r}`;
+      keep.add(key);
+      if (t.inView) want.push(key);
+      if (!tiles.has(key)) addTile(level, t.c, t.r, key, lw, lh);
+    }
+    // Drop sharper tiles after zooming out, and far-away ones once there are many.
+    for (const [key, im] of tiles) {
+      const l = +key[0];
+      if (l > level || (tiles.size > 96 && !keep.has(key))) { im.remove(); tiles.delete(key); }
+    }
+    progress();
+  }
+  function addTile(l, c, r, key, lw, lh) {
+    const x = c * TILE, y = r * TILE;
+    const w = Math.min(TILE + 1, lw - x), h = Math.min(TILE + 1, lh - y);
+    const im = new Image();
+    im.alt = '';
+    im.decoding = 'async';
+    im.style.cssText = `left:${x / lw * 100}%;top:${y / lh * 100}%;width:${w / lw * 100}%;height:${h / lh * 100}%;z-index:${l}`;
+    im.onload = () => { im.done = true; im.classList.add('on'); progress(); };
+    im.onerror = () => { im.done = true; progress(); };
+    im.src = tileSrc(cur, l, c, r);
+    layers[cur].appendChild(im);
+    tiles.set(key, im);
+  }
+
+  // Ring in the corner, shown only while zoomed in and something in view is still loading.
+  const load = $('load'), ring = $('loadRing'), CIRC = 50.27;
+  let ringTimer = 0, hideTimer = 0;
+  function progress() {
+    let total = want.length, done = 0;
+    for (const key of want) { const im = tiles.get(key); if (im && im.done) done++; }
+    if (cur >= 0 && !baseDone[cur]) total++;
+    const pending = z.s > 1.001 && done < total;
+    ring.style.strokeDashoffset = CIRC * (1 - (total ? done / total : 1));
+    if (pending) {
+      clearTimeout(hideTimer); hideTimer = 0;
+      if (!load.classList.contains('on') && !ringTimer)
+        ringTimer = setTimeout(() => { ringTimer = 0; load.classList.add('on'); }, 250);
+    } else {
+      clearTimeout(ringTimer); ringTimer = 0;
+      if (load.classList.contains('on') && !hideTimer)
+        hideTimer = setTimeout(() => { hideTimer = 0; load.classList.remove('on'); }, 300);
+    }
+  }
+  function placeLoader() {
+    load.style.top = `${track.getBoundingClientRect().bottom - 44}px`;
   }
   function resetZoom(anim = true) {
     if (cur < 0) return;
@@ -455,9 +642,10 @@ body.zoomed #track { overflow-x: hidden; touch-action: none; }
       track.scrollLeft = cur * W();
       const m = mid(t[0], t[1]);
       pinch = { d: dist(t[0], t[1]), x: m.x, y: m.y, base: { ...z } };
+      moving(true);
     } else if (t.length === 1) {
       tap = { x: t[0].clientX, y: t[0].clientY, time: Date.now() };
-      if (z.s > 1.001) pan = { x: t[0].clientX, y: t[0].clientY, tx: z.tx, ty: z.ty };
+      if (z.s > 1.001) { pan = { x: t[0].clientX, y: t[0].clientY, tx: z.tx, ty: z.ty }; moving(true); }
     } else { tap = null; }
   }, { passive: false });
 
@@ -502,12 +690,13 @@ body.zoomed #track { overflow-x: hidden; touch-action: none; }
       if (e.touches.length === 1 && z.s > 1.001) {
         const t = e.touches[0];
         pan = { x: t.clientX, y: t.clientY, tx: z.tx, ty: z.ty };
-      }
+      } else moving(false);
       tap = null;
       return;
     }
     if (e.touches.length) return;
     pan = null;
+    moving(false);
     if (!tap || e.type === 'touchcancel' || Date.now() - tap.time > 350) { tap = null; return; }
     const p = tap; tap = null;
     if (lastTap && p.time - lastTap.time < 320 && Math.hypot(p.x - lastTap.x, p.y - lastTap.y) < 40) {
@@ -536,6 +725,7 @@ body.zoomed #track { overflow-x: hidden; touch-action: none; }
     if (z.s <= 1.001 || e.button) return;
     e.preventDefault();
     drag = { x: e.clientX, y: e.clientY, tx: z.tx, ty: z.ty };
+    moving(true);
     track.style.cursor = 'grabbing';
   });
   addEventListener('mousemove', e => {
@@ -543,8 +733,10 @@ body.zoomed #track { overflow-x: hidden; touch-action: none; }
     z.tx = drag.tx + e.clientX - drag.x; z.ty = drag.ty + e.clientY - drag.y;
     clampZ(geom(), z); apply(false);
   });
-  addEventListener('mouseup', () => { drag = null; track.style.cursor = ''; });
+  addEventListener('mouseup', () => { if (drag) moving(false); drag = null; track.style.cursor = ''; });
+  let wheelTimer = 0;
   track.addEventListener('wheel', e => {
+    if (e.ctrlKey || z.s > 1.001) { moving(true); clearTimeout(wheelTimer); wheelTimer = setTimeout(() => moving(false), 200); }
     if (e.ctrlKey) {
       e.preventDefault();
       const s = Math.max(1, Math.min(MAX, z.s * Math.exp(-e.deltaY / 100)));
