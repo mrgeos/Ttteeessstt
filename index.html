@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>YOY — Pleasure Lab · концепция</title>
-<meta name="description" content="YOY — Pleasure Lab. Your Pleasure Formula Yogurt. Концепция бренда, 23 слайда.">
+<meta name="description" content="YOY — Pleasure Lab. Your Pleasure Formula Yogurt. Концепция бренда, 24 слайда.">
 <meta property="og:title" content="YOY — Pleasure Lab">
 <meta property="og:description" content="Your Pleasure Formula Yogurt — концепция бренда">
 <meta property="og:type" content="website">
@@ -206,7 +206,7 @@ body.zoomed #track { overflow-x: hidden; touch-action: none; }
 <header class="top">
   <div class="title"><b>YOY — Pleasure Lab</b><span>Концепция бренда</span></div>
   <div class="ctrls">
-    <span class="count" id="count" aria-live="polite">1 / 23</span>
+    <span class="count" id="count" aria-live="polite">1 / 24</span>
     <button class="icon" id="gridBtn" aria-label="Все слайды" title="Все слайды (G)">
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="2.5" y="2.5" width="6" height="6" rx="1.5"/><rect x="11.5" y="2.5" width="6" height="6" rx="1.5"/><rect x="2.5" y="11.5" width="6" height="6" rx="1.5"/><rect x="11.5" y="11.5" width="6" height="6" rx="1.5"/></svg>
     </button>
@@ -246,12 +246,12 @@ body.zoomed #track { overflow-x: hidden; touch-action: none; }
 
 <script>
 (() => {
-  // Width / height of each slide (slides 8, 12 and 21 are taller than the rest).
-  const AR = [1.6672,1.6672,1.6672,1.6672,1.6672,1.6672,1.6672,1.5432,1.6672,1.6672,1.6672,1.6141,1.6672,1.6672,1.6672,1.6672,1.6672,1.6672,1.6672,1.6672,1.3926,1.6672,1.6672];
+  // Width / height of each slide (slides 8 and 12 are taller than the rest).
+  const AR = [1.6672,1.6672,1.6672,1.6672,1.6672,1.6672,1.6672,1.5432,1.6672,1.6672,1.6672,1.6141,1.6672,1.6672,1.6672,1.6672,1.6672,1.6672,1.6672,1.6672,1.6672,1.6672,1.6672,1.6672];
   const N = AR.length;
   const id = i => String(i + 1).padStart(2, '0');
   // Bump V when slide images change so cached copies are not reused.
-  const V = 5;
+  const V = 6;
   const src = (i, size) => `slides/${id(i)}-${size}.webp?v=${V}`;
 
   const $ = s => document.getElementById(s);
