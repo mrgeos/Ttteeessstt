@@ -251,7 +251,7 @@ body.zoomed #track { overflow-x: hidden; touch-action: none; }
   const N = AR.length;
   const id = i => String(i + 1).padStart(2, '0');
   // Bump V when slide images change so cached copies are not reused.
-  const V = 4;
+  const V = 5;
   const src = (i, size) => `slides/${id(i)}-${size}.webp?v=${V}`;
 
   const $ = s => document.getElementById(s);
